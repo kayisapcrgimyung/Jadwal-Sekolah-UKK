@@ -475,21 +475,10 @@ box-shadow: 2px 2px 4px rgba(0,0,0,0.1);    }
           <i class="fas fa-graduation-cap"></i>
         </div>
         <h1>Selamat Datang!</h1>
-        <p>Masuk ke sistem pembelajaran Klipaa untuk mengakses materi, tugas, dan informasi akademik Anda.</p>
+        <p>Masuk ke sistem pembelajaran Klipaa untuk mengakses Jadwal Pelajaran yang akan datang.</p>
         
         <div class="features">
-          <div class="feature-item">
-            <i class="fas fa-check-circle"></i>
-            <span>Akses Materi Pembelajaran</span>
-          </div>
-          <div class="feature-item">
-            <i class="fas fa-check-circle"></i>
-            <span>Kelola Tugas & Nilai</span>
-          </div>
-          <div class="feature-item">
-            <i class="fas fa-check-circle"></i>
-            <span>Komunikasi Real-time</span>
-          </div>
+          
         </div>
       </div>
     </div>

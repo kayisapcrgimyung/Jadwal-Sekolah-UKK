@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Beranda Admin - Klipaa Solusi Indonesia</title>
+    <title>SchoolTime Admin - Klipaa Solusi Indonesia</title>
 
     <!-- Styles -->
     <link rel="stylesheet" href="/css/newStyle.css">
