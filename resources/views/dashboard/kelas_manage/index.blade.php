@@ -92,14 +92,14 @@
                             </span>
                         </td>
                         <td style="padding: 20px; text-align: center;">
-                            <div style="display: flex; gap: 8px; justify-content: center;">
-                                <a href="{{ route('manage.kelas.edit', $k->id) }}" class="btn btn-sm btn-info" title="Edit Kelas" style="background: var(--warning-gradient); box-shadow: none; padding: 8px 12px;">
+                            <div class="action-buttons">
+                                <a href="{{ route('manage.kelas.edit', $k->id) }}" class="btn-action btn-edit" title="Edit Kelas">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <form action="{{ route('manage.kelas.destroy', $k->id) }}" method="POST" style="display:inline; margin: 0;">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger" title="Hapus Kelas" onclick="return confirm('Apakah Anda yakin ingin menghapus kelas ini? Ini tidak dapat dibatalkan.')" style="background: linear-gradient(135deg, #ff6b6b, #ff8e8e); box-shadow: none; padding: 8px 12px;">
+                                    <button type="submit" class="btn-action btn-delete" title="Hapus Kelas" onclick="return confirm('Apakah Anda yakin ingin menghapus kelas ini? Ini tidak dapat dibatalkan.')">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
@@ -132,9 +132,67 @@
         background-color: rgba(17, 153, 142, 0.05);
         transform: scale(1.005);
     }
-    .btn:hover {
+    
+    /* Action Buttons Styling */
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+        text-decoration: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-edit {
+        background: linear-gradient(135deg, #ffa726, #ffb74d);
+        color: white;
+    }
+    
+    .btn-edit:hover {
+        background: linear-gradient(135deg, #ff9800, #ffa726);
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+        box-shadow: 0 4px 12px rgba(255, 167, 38, 0.4);
+    }
+    
+    .btn-delete {
+        background: linear-gradient(135deg, #ef5350, #e57373);
+        color: white;
+    }
+    
+    .btn-delete:hover {
+        background: linear-gradient(135deg, #e53935, #ef5350);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(239, 83, 80, 0.4);
+    }
+    
+    .btn-action i {
+        font-size: 0.9rem;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .action-buttons {
+            gap: 8px;
+        }
+        
+        .btn-action {
+            width: 36px;
+            height: 36px;
+            font-size: 0.85rem;
+        }
     }
 </style>
 @endpush

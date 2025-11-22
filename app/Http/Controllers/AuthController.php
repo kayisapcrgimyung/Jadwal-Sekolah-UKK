@@ -9,35 +9,37 @@ class AuthController extends Controller
 {
     public function login(Request $request)
     {
-        $request->validate([
+        // Regenerate session SEBELUM validasi
+        $request->session()->regenerate();
+
+        $validated = $request->validate([
             'nis'      => 'required|string',
             'password' => 'required|string',
+        ], [
+            'nis.required' => 'NIS/NIP harus diisi',
+            'password.required' => 'Password harus diisi',
         ]);
 
-        $identifier = $request->input('nis');
-        $password   = $request->input('password');
+        $identifier = $validated['nis'];
+        $password   = $validated['password'];
 
         // === 1) ADMIN ===
         if (Auth::guard('web')->attempt(['nip' => $identifier, 'password' => $password])) {
-            $request->session()->regenerate();
             return redirect()->route('admin.dashboard')->with('login_success', 'Berhasil masuk sebagai Admin!');
         }
 
         // === 2) GURU ===
         if (Auth::guard('guru')->attempt(['nip' => $identifier, 'password' => $password])) {
-            $request->session()->regenerate();
             return redirect()->route('guru.dashboard')->with('login_success', 'Berhasil masuk sebagai Guru!');
         }
 
         // === 3) SISWA ===
         if (Auth::guard('siswa')->attempt(['nis' => $identifier, 'password' => $password])) {
-            $request->session()->regenerate();
             return redirect()->route('siswa.dashboard')->with('login_success', 'Berhasil masuk sebagai Siswa!');
         }
 
         // === Jika gagal ===
-        return back()->withErrors(['login' => 'NIS/NIP atau password yang kamu masukkan salah.']);
-
+        return back()->withErrors(['login' => 'NIS/NIP atau password yang Anda masukkan salah.'])->withInput();
     }
 
     public function logout(Request $request)

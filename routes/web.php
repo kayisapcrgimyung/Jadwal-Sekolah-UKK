@@ -13,17 +13,26 @@ use App\Http\Controllers\KelasKategoriController;
 use App\Http\Controllers\TabeljController;
 use App\Http\Controllers\JadwalKategoriController;
 use App\Http\Controllers\TahunAjaranController;
+use App\Http\Controllers\LandingController;
 
 // ============================
 // HALAMAN UTAMA / LOGIN
 // ============================
-Route::get('/', function () {
-    return view('welcome');
-})->name('welcome');
+Route::get('/', [LandingController::class, 'index'])->name('landing');
+Route::get('/login', [LandingController::class, 'showAdminLogin'])->name('login');
+Route::get('/login-user', [LandingController::class, 'showUserLogin'])->name('login.user');
 
-// Redirect GET /login agar tidak error
-Route::get('/login', fn() => redirect('/'));
-Route::post('/login', [AuthController::class, 'login'])->name('login');
+// ============================
+// AUTH (Login / Logout)
+// ============================
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::post('/login-user', [AuthController::class, 'login'])->name('login.user.post');
+
+// Support legacy GET requests to /logout (some templates/links may still trigger GET).
+// This will perform the same logout action as the POST route.
+// NOTE: keep POST /logout for CSRF-protected form submission.
+Route::get('/logout', [AuthController::class, 'logout'])->name('logout.get');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // ============================
 // SISWA
@@ -32,7 +41,6 @@ Route::middleware('auth:siswa')->group(function () {
     Route::get('/dashboard/siswa', [SiswaController::class, 'index'])->name('siswa.dashboard');
     Route::get('/dashboard/siswa/jadwal', [SiswaController::class, 'jadwal'])->name('siswa.jadwal');
     Route::get('/dashboard/siswa/jadwal/cetak', [SiswaController::class, 'cetakJadwal'])->name('siswa.jadwal.cetak');
-    Route::post('/dashboard/siswa/profile/update', [GuruController::class, 'updateProfilePicture'])->name('siswa.profile.update');
     Route::post('/dashboard/siswa/profile/update', [SiswaController::class, 'updateProfilePicture'])->name('siswa.profile.update');
     Route::post('/dashboard/siswa/switch-tahun-ajaran', [SiswaController::class, 'switchTahunAjaran'])->name('siswa.switch-tahun-ajaran');
     Route::get('/dashboard/siswa/jadwal/arsip/{tahun_ajaran_id}', [SiswaController::class, 'getArsipJadwal'])->name('siswa.jadwal.arsip');
@@ -144,8 +152,3 @@ Route::middleware('auth:web')->group(function () {
     Route::get('/kelas/{kategori}', [KelasKategoriController::class, 'show'])->name('kelas.show');
     Route::get('/kelas/{kategori}/{kelas}', [KelasKategoriController::class, 'detail'])->name('kelas.detail');
 });
-
-// ============================
-// LOGOUT (GET agar tidak error 405)
-// ============================
-Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
