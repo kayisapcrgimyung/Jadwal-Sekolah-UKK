@@ -15,9 +15,9 @@ class DatabaseSeeder extends Seeder
 {
     $this->call([
         TahunAjaranDefaultSeeder::class, // Pindahkan ke atas agar tahun ajaran dibuat lebih dulu
-        GuruSeeder::class,
+        //GuruSeeder::class,
         AdminSeeder::class,
-        SiswaSeeder::class, // Pastikan seeder ini juga menggunakan firstOrCreate jika perlu
+        //SiswaSeeder::class, // Pastikan seeder ini juga menggunakan firstOrCreate jika perlu
     ]);
 }
 }
