@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{{ asset('img/Klipaa Original.png') }}">
     <title>SchoolTime - Klipaa Solusi Indonesia</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -184,7 +185,7 @@
 
             <div class="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
                 <!-- Admin Card -->
-                <a href="/login" class="card-minimal group block bg-white rounded-2xl p-8 border-2 border-gray-100 hover:border-green-400 transition-all">
+                <a href="/admin/login" class="card-minimal group block bg-white rounded-2xl p-8 border-2 border-gray-100 hover:border-green-400 transition-all">
                     <div class="flex flex-col items-center text-center space-y-4">
                         <div class="w-14 h-14 bg-green-50 group-hover:bg-green-100 rounded-xl flex items-center justify-center transition-colors">
                             <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -206,7 +207,7 @@
                 </a>
 
                 <!-- User Card -->
-                <a href="/login-user" class="card-minimal group block bg-white rounded-2xl p-8 border-2 border-gray-100 hover:border-emerald-400 transition-all">
+                <a href="/login" class="card-minimal group block bg-white rounded-2xl p-8 border-2 border-gray-100 hover:border-emerald-400 transition-all">
                     <div class="flex flex-col items-center text-center space-y-4">
                         <div class="w-14 h-14 bg-emerald-50 group-hover:bg-emerald-100 rounded-xl flex items-center justify-center transition-colors">
                             <svg class="w-7 h-7 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

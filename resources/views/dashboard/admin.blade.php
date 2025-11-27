@@ -114,9 +114,12 @@
                         <strong>{{ Auth::guard('web')->user()->name }}</strong>
                         <small>{{ Auth::guard('web')->user()->email }}</small>
                     </div>
-                    <a href="{{ route('logout') }}" class="user-dropdown-item" onclick="showLogoutConfirmation(event)">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </a>
+                    <form action="{{ route('logout') }}" method="POST">
+    @csrf
+    <button type="submit" class="user-dropdown-item">
+        <i class="fas fa-sign-out-alt"></i> Logout
+    </button>
+</form>
                 </div>
             </div>
         </div>
@@ -149,11 +152,6 @@
                     </a> 
                 </li>
                 <li>
-                    <a href="{{ route('manage.guru.index') }}" class="menu-item {{ request()->routeIs('manage.guru.*') ? 'active' : '' }}">
-                        <i class="fas fa-chalkboard-teacher"></i><span>Manajemen Guru</span>
-                    </a>
-                </li>
-                <li>
                     <a href="{{ route('manage.siswa.index') }}" class="menu-item {{ request()->routeIs('manage.siswa.*') ? 'active' : '' }}">
                         <i class="fas fa-users"></i><span>Manajemen Siswa</span>
                     </a>
@@ -174,6 +172,11 @@
                     </a>
                 </li>
                 <li>
+                    <a href="{{ route('manage.guru.index') }}" class="menu-item {{ request()->routeIs('manage.guru.*') ? 'active' : '' }}">
+                        <i class="fas fa-chalkboard-teacher"></i><span>Manajemen Guru</span>
+                    </a>
+                </li>
+                <li>
                     <a href="{{ route('jadwal.pilihKelas') }}" class="menu-item {{ request()->routeIs('jadwal.pilihKelas') ? 'active' : '' }}">
                         <i class="fas fa-calendar-check"></i><span>Manajemen Jadwal</span>
                     </a>
@@ -190,9 +193,13 @@
                 </li>
             </ul>
 
-            <a href="{{ route('logout') }}" class="logout-btn" onclick="showLogoutConfirmation(event)">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </a>
+            <form action="{{ route('logout') }}" method="POST">
+    @csrf
+    <button type="submit" class="logout-btn" onclick="showLogoutConfirmation(event)">
+        <i class="fas fa-sign-out-alt"></i> Logout
+    </button>
+</form>
+
         </aside>
 
         <!-- Main Content -->
@@ -366,23 +373,23 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         function showLogoutConfirmation(event) {
-            event.preventDefault();
-            let link = event.currentTarget.href;
-            Swal.fire({
-                title: 'Yakin akan keluar?',
-                text: "Anda akan keluar dari sesi ini.",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Ya, keluar!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = link;
-                }
-            });
+    event.preventDefault();
+    let form = event.currentTarget.closest('form');
+    Swal.fire({
+        title: 'Yakin akan keluar?',
+        text: "Anda akan keluar dari sesi ini.",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ya, keluar!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.submit();
         }
+    });
+}
 
         document.addEventListener('DOMContentLoaded', function() {
             @if(session('login_success'))

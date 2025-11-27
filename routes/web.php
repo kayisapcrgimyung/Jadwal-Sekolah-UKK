@@ -15,72 +15,74 @@ use App\Http\Controllers\JadwalKategoriController;
 use App\Http\Controllers\TahunAjaranController;
 use App\Http\Controllers\LandingController;
 
-// ============================
-// HALAMAN UTAMA / LOGIN
-// ============================
-Route::get('/', [LandingController::class, 'index'])->name('landing');
-Route::get('/login', [LandingController::class, 'showAdminLogin'])->name('login');
-Route::get('/login-user', [LandingController::class, 'showUserLogin'])->name('login.user');
+// HALAMAN UTAMA / LOGIN - hanya untuk guest (cek semua guard)
+Route::middleware('guest.all')->group(function () {
+	// landing
+	Route::get('/', [LandingController::class, 'index'])->name('landing');
 
-// ============================
-// AUTH (Login / Logout)
-// ============================
-Route::post('/login', [AuthController::class, 'login'])->name('login.post');
-Route::post('/login-user', [AuthController::class, 'login'])->name('login.user.post');
+	// Admin login (form + submit)
+	Route::get('/admin/login', [LandingController::class, 'showAdminLogin'])->name('login');
+	Route::post('/admin/login', [AuthController::class, 'login'])->name('login.post');
 
-// Support legacy GET requests to /logout (some templates/links may still trigger GET).
-// This will perform the same logout action as the POST route.
-// NOTE: keep POST /logout for CSRF-protected form submission.
-Route::get('/logout', [AuthController::class, 'logout'])->name('logout.get');
+	// User login (guru/siswa) (form + submit)
+	Route::get('/login', [LandingController::class, 'showUserLogin'])->name('login.user');
+	Route::post('/login', [AuthController::class, 'login'])->name('login.user.post');
+});
+
+// Logout (POST)
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// ============================
 // SISWA
-// ============================
-Route::middleware('auth:siswa')->group(function () {
-    Route::get('/dashboard/siswa', [SiswaController::class, 'index'])->name('siswa.dashboard');
-    Route::get('/dashboard/siswa/jadwal', [SiswaController::class, 'jadwal'])->name('siswa.jadwal');
-    Route::get('/dashboard/siswa/jadwal/cetak', [SiswaController::class, 'cetakJadwal'])->name('siswa.jadwal.cetak');
-    Route::post('/dashboard/siswa/profile/update', [SiswaController::class, 'updateProfilePicture'])->name('siswa.profile.update');
-    Route::post('/dashboard/siswa/switch-tahun-ajaran', [SiswaController::class, 'switchTahunAjaran'])->name('siswa.switch-tahun-ajaran');
-    Route::get('/dashboard/siswa/jadwal/arsip/{tahun_ajaran_id}', [SiswaController::class, 'getArsipJadwal'])->name('siswa.jadwal.arsip');
+Route::middleware('auth:siswa')->prefix('dashboard/siswa')->name('siswa.')->group(function () {
+	// ...existing siswa routes...
+	Route::get('/', [SiswaController::class, 'index'])->name('dashboard');
+	Route::get('/jadwal', [SiswaController::class, 'jadwal'])->name('jadwal');
+	Route::get('/jadwal/cetak', [SiswaController::class, 'cetakJadwal'])->name('jadwal.cetak');
+	Route::post('/profile/update', [SiswaController::class, 'updateProfilePicture'])->name('profile.update');
+	Route::post('/switch-tahun-ajaran', [SiswaController::class, 'switchTahunAjaran'])->name('switch-tahun-ajaran');
+	Route::get('/jadwal/arsip/{tahun_ajaran_id}', [SiswaController::class, 'getArsipJadwal'])->name('jadwal.arsip');
 });
 
-// ============================
 // GURU
-// ============================
-Route::middleware('auth:guru')->group(function () {
-    Route::get('/dashboard/guru', [GuruController::class, 'index'])->name('guru.dashboard');
-    Route::get('/dashboard/guru/jadwal', [GuruController::class, 'jadwal'])->name('guru.jadwal');
-    Route::get('/dashboard/guru/jadwal/cetak', [GuruController::class, 'cetakJadwal'])->name('guru.jadwal.cetak');
-    Route::post('/dashboard/guru/profile/update', [GuruController::class, 'updateProfilePicture'])->name('guru.profile.update');
-    Route::post('/dashboard/guru/switch-tahun-ajaran', [GuruController::class, 'switchTahunAjaran'])->name('guru.switch-tahun-ajaran');
-    Route::get('/dashboard/guru/jadwal/arsip/{tahun_ajaran_id}', [GuruController::class, 'getArsipJadwal'])->name('guru.jadwal.arsip');
+Route::middleware('auth:guru')->prefix('dashboard/guru')->name('guru.')->group(function () {
+	// ...existing guru routes...
+	Route::get('/', [GuruController::class, 'index'])->name('dashboard');
+	Route::get('/jadwal', [GuruController::class, 'jadwal'])->name('jadwal');
+	Route::get('/jadwal/cetak', [GuruController::class, 'cetakJadwal'])->name('jadwal.cetak');
+	Route::post('/profile/update', [GuruController::class, 'updateProfilePicture'])->name('profile.update');
+	Route::post('/switch-tahun-ajaran', [GuruController::class, 'switchTahunAjaran'])->name('switch-tahun-ajaran');
+	Route::get('/jadwal/arsip/{tahun_ajaran_id}', [GuruController::class, 'getArsipJadwal'])->name('jadwal.arsip');
 });
 
-// ============================
-// ADMIN
-// ============================
+// ADMIN (auth:web)
 Route::middleware('auth:web')->group(function () {
-    // Dashboard
-    Route::get('/dashboard/admin', [AdminController::class, 'index'])->name('admin.dashboard');
+	// Dashboard
+	Route::get('/dashboard/admin', [AdminController::class, 'index'])->name('admin.dashboard');
 
-    // Jadwal CRUD
-    Route::get('/jadwal/pilih-kelas', [JadwalController::class, 'pilihKelas'])->name('jadwal.pilihKelas');
-    Route::get('/jadwal/pilih-subkelas/{kategori}', [JadwalController::class, 'pilihSubKelas'])->name('jadwal.pilihSubKelas');
-    Route::get('/jadwal/create/{kelas}', [JadwalController::class, 'create'])->name('jadwal.create');
-    Route::post('/jadwal/store', [JadwalController::class, 'store'])->name('jadwal.store');
-    Route::post('/jadwal/store-kategori', [JadwalController::class, 'storeKategori'])->name('jadwal.storeKategori');
-    Route::get('/jadwal/kelas', [JadwalController::class, 'pilihKelasLihat'])->name('jadwal.pilihKelasLihat');
-    Route::get('/jadwal/kelas/{kelas}', [JadwalController::class, 'jadwalPerKelas'])->name('jadwal.perKelas');
-    Route::get('/jadwal/kelas/{kelas}/cetak', [JadwalController::class, 'cetakJadwal'])->name('admin.jadwal.cetak');
-    Route::get('/jadwal/cetak-bulk', [JadwalController::class, 'cetakJadwalBulk'])->name('admin.jadwal.cetak.bulk');
-    Route::post('/jadwal/bulk-store', [JadwalController::class, 'bulkStore'])->name('jadwal.bulkStore');
-    Route::delete('/jadwal/{jadwal}', [JadwalController::class, 'destroy'])->name('jadwal.destroy');
-    Route::delete('/jadwal/destroy-all/{kelas_id}', [JadwalController::class, 'destroyAll'])->name('jadwal.destroyAll');
+	// Jadwal CRUD + cetak (pastikan nama route 'admin.jadwal.cetak' ada)
+	Route::get('/jadwal/pilih-kelas', [JadwalController::class, 'pilihKelas'])->name('jadwal.pilihKelas');
+	Route::get('/jadwal/pilih-subkelas/{kategori}', [JadwalController::class, 'pilihSubKelas'])->name('jadwal.pilihSubKelas');
+	Route::get('/jadwal/create/{kelas}', [JadwalController::class, 'create'])->name('jadwal.create');
+	Route::post('/jadwal/store', [JadwalController::class, 'store'])->name('jadwal.store');
+	Route::post('/jadwal/store-kategori', [JadwalController::class, 'storeKategori'])->name('jadwal.storeKategori');
+	Route::get('/jadwal/kelas', [JadwalController::class, 'pilihKelasLihat'])->name('jadwal.pilihKelasLihat');
+	Route::get('/jadwal/kelas/{kelas}', [JadwalController::class, 'jadwalPerKelas'])->name('jadwal.perKelas');
+	Route::get('/jadwal/kelas/{kelas}/cetak', [JadwalController::class, 'cetakJadwal'])->name('admin.jadwal.cetak');
+	Route::get('/jadwal/cetak-bulk', [JadwalController::class, 'cetakJadwalBulk'])->name('admin.jadwal.cetak.bulk');
+	Route::post('/jadwal/bulk-store', [JadwalController::class, 'bulkStore'])->name('jadwal.bulkStore');
+	Route::delete('/jadwal/{jadwal}', [JadwalController::class, 'destroy'])->name('jadwal.destroy');
+	Route::delete('/jadwal/destroy-all/{kelas_id}', [JadwalController::class, 'destroyAll'])->name('jadwal.destroyAll');
 
-    // Manajemen tabel jadwal
-    Route::delete('/manage/tabelj/destroy-all', [TabeljController::class, 'destroyAll'])->name('manage.tabelj.destroyAll');
+	// ============================
+    // MANAJEMEN TABEL JADWAL
+    // ============================
+    Route::prefix('manage/tabelj')->name('manage.tabelj.')->group(function () {
+        Route::delete('/destroy-all', [TabeljController::class, 'destroyAll'])->name('destroyAll');
+        Route::get('/assign-category', [TabeljController::class, 'assignCategory'])->name('assignCategory');
+        Route::post('/assign-category', [TabeljController::class, 'storeAssignedCategory'])->name('storeAssignedCategory');
+        Route::post('/{tabelj}/add-break', [TabeljController::class, 'addBreak'])->name('addBreak');
+    });
+    
     Route::resource('manage/tabelj', TabeljController::class)->except(['show'])->names([
         'index' => 'manage.tabelj.index',
         'create' => 'manage.tabelj.create',
@@ -89,30 +91,33 @@ Route::middleware('auth:web')->group(function () {
         'update' => 'manage.tabelj.update',
         'destroy' => 'manage.tabelj.destroy',
     ]);
-    Route::get('/manage/tabelj/assign-category', [TabeljController::class, 'assignCategory'])->name('manage.tabelj.assignCategory');
-    Route::post('/manage/tabelj/assign-category', [TabeljController::class, 'storeAssignedCategory'])->name('manage.tabelj.storeAssignedCategory');
-    Route::post('/manage/tabelj/{tabelj}/add-break', [TabeljController::class, 'addBreak'])->name('manage.tabelj.addBreak');
 
-    // Manajemen Guru
-    // Rute spesifik harus di atas resource controller
+    // ============================
+    // MANAJEMEN GURU
+    // ============================
     Route::get('manage/guru/import', [ManageGuruController::class, 'showImportForm'])->name('manage.guru.import.show');
     Route::post('manage/guru/import', [ManageGuruController::class, 'import'])->name('manage.guru.import.store');
     Route::get('manage/guru/{guru}/availability', [ManageGuruController::class, 'editAvailability'])->name('manage.guru.availability.edit');
     Route::post('manage/guru/{guru}/availability', [ManageGuruController::class, 'updateAvailability'])->name('manage.guru.availability.update');
-    Route::resource('manage/guru', ManageGuruController::class, ['except' => ['show'], 'names' => [
+    Route::resource('manage/guru', ManageGuruController::class)->except(['show'])->names([
         'index' => 'manage.guru.index',
         'create' => 'manage.guru.create',
         'store' => 'manage.guru.store',
         'edit' => 'manage.guru.edit',
         'update' => 'manage.guru.update',
         'destroy' => 'manage.guru.destroy',
-    ]]);
+    ]);
 
-    // FIX: Pindahkan rute spesifik ke ATAS resource controller
-
-    Route::get('manage/siswa/export', [ManageSiswaController::class, 'export'])->name('manage.siswa.export');
-    Route::get('manage/siswa/import', [ManageSiswaController::class, 'showImportForm'])->name('manage.siswa.import.form');
-    Route::post('manage/siswa/import', [ManageSiswaController::class, 'import'])->name('manage.siswa.import'); // Ubah nama rute agar konsisten
+    // ============================
+    // MANAJEMEN SISWA
+    // ============================
+    // Rute spesifik HARUS di atas resource controller
+    Route::prefix('manage/siswa')->name('manage.siswa.')->group(function () {
+        Route::get('/export', [ManageSiswaController::class, 'export'])->name('export');
+        Route::get('/import', [ManageSiswaController::class, 'showImportForm'])->name('import.form');
+        Route::post('/import', [ManageSiswaController::class, 'import'])->name('import');
+    });
+    
     Route::resource('manage/siswa', ManageSiswaController::class)->except(['show'])->names([
         'index' => 'manage.siswa.index',
         'create' => 'manage.siswa.create',
@@ -122,7 +127,9 @@ Route::middleware('auth:web')->group(function () {
         'destroy' => 'manage.siswa.destroy',
     ]);
 
-    // Manajemen Kelas
+    // ============================
+    // MANAJEMEN KELAS
+    // ============================
     Route::resource('manage/kelas', ManageKelasController::class)->names([
         'index' => 'manage.kelas.index',
         'create' => 'manage.kelas.create',
@@ -133,8 +140,19 @@ Route::middleware('auth:web')->group(function () {
         'show' => 'manage.kelas.show',
     ]);
 
-    // Jadwal Kategori & Tahun Ajaran
+    // ============================
+    // JADWAL KATEGORI
+    // ============================
     Route::resource('jadwal-kategori', JadwalKategoriController::class);
+
+    // ============================
+    // MANAJEMEN TAHUN AJARAN
+    // ============================
+    Route::prefix('manage/tahun-ajaran')->name('manage.tahun-ajaran.')->group(function () {
+        Route::post('/{tahun_ajaran}/set-active', [TahunAjaranController::class, 'setActive'])->name('setActive');
+        Route::get('/{tahun_ajaran}/switch-active', [TahunAjaranController::class, 'switchActive'])->name('switch');
+    });
+    
     Route::resource('manage/tahun-ajaran', TahunAjaranController::class)->names([
         'index' => 'manage.tahun-ajaran.index',
         'create' => 'manage.tahun-ajaran.create',
@@ -144,11 +162,13 @@ Route::middleware('auth:web')->group(function () {
         'update' => 'manage.tahun-ajaran.update',
         'destroy' => 'manage.tahun-ajaran.destroy',
     ]);
-    Route::post('manage/tahun-ajaran/{tahun_ajaran}/set-active', [TahunAjaranController::class, 'setActive'])->name('manage.tahun-ajaran.setActive');
-    Route::get('manage/tahun-ajaran/{tahun_ajaran}/switch-active', [TahunAjaranController::class, 'switchActive'])->name('manage.tahun-ajaran.switch');
 
-    // Kelas Kategori
-    Route::get('/kelas', [KelasKategoriController::class, 'index'])->name('kelas.kategori');
-    Route::get('/kelas/{kategori}', [KelasKategoriController::class, 'show'])->name('kelas.show');
-    Route::get('/kelas/{kategori}/{kelas}', [KelasKategoriController::class, 'detail'])->name('kelas.detail');
+    // ============================
+    // KELAS KATEGORI
+    // ============================
+    Route::prefix('kelas')->name('kelas.')->group(function () {
+        Route::get('/', [KelasKategoriController::class, 'index'])->name('kategori');
+        Route::get('/{kategori}', [KelasKategoriController::class, 'show'])->name('show');
+        Route::get('/{kategori}/{kelas}', [KelasKategoriController::class, 'detail'])->name('detail');
+    });
 });

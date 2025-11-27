@@ -253,7 +253,9 @@ document.addEventListener('DOMContentLoaded', function() {
     clearBtn.addEventListener('click', function() {
         searchInput.value = '';
         searchInput.dispatchEvent(new Event('input'));
+        selectAllClasses.checked = false;
         searchInput.focus();
+        updatePrintButtonVisibility();
     });
 
     // Bulk print functionality

@@ -31,7 +31,7 @@ class JadwalController extends Controller
         $gurus = Guru::with(['availabilities' => function ($query) {
             $query->orderBy('hari')->orderBy('jam_mulai');
         }])->orderBy('nama')->get();
-        
+
         $kategoris = JadwalKategori::all();
         $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
         $timeSlots = Tabelj::with('jadwalKategori')->orderBy('jam_mulai')->get()->map(function ($slot) {
@@ -177,18 +177,37 @@ class JadwalController extends Controller
             'hari' => 'required|string|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu',
             'jam' => 'required|string',
         ]);
-        
-        // Basic validation for jam format
-        if (!preg_match('/^\d{2}:\d{2} - \d{2}:\d{2}$/', $validated['jam'])) {
-            return back()->with('error', 'Format jam tidak valid. Harusnya HH:MM - HH:MM');
-        }
 
-        Jadwal::create([
-            'kelas_id' => $validated['kelas_id'],
-            'jadwal_kategori_id' => $validated['kategori_id'],
-            'hari' => $validated['hari'],
-            'jam' => $validated['jam'],
-        ]);
+        // Validasi format jam
+if (!preg_match('/^\d{2}:\d{2} - \d{2}:\d{2}$/', $validated['jam'])) {
+    return back()->with('error', 'Format jam tidak valid. Harusnya HH:MM - HH:MM');
+}
+
+// Validasi jam mulai < jam selesai
+try {
+    [$jamMulai, $jamSelesai] = explode(' - ', $validated['jam']);
+    $startTime = \Carbon\Carbon::parse($jamMulai);
+    $endTime = \Carbon\Carbon::parse($jamSelesai);
+    
+    if ($endTime->lte($startTime)) {
+        return back()->with('error', 'Jam selesai harus lebih besar dari jam mulai');
+    }
+} catch (\Exception $e) {
+    return back()->with('error', 'Format waktu tidak valid (gunakan format 24 jam yang benar)');
+}
+
+$activeTahunAjaranId = session('tahun_ajaran_id');
+if (!$activeTahunAjaranId) {
+    return back()->with('error', 'Tahun ajaran tidak aktif. Silakan pilih tahun ajaran terlebih dahulu.');
+}
+
+Jadwal::create([
+    'kelas_id' => $validated['kelas_id'],
+    'jadwal_kategori_id' => $validated['kategori_id'],
+    'hari' => $validated['hari'],
+    'jam' => $validated['jam'],
+    'tahun_ajaran_id' => $activeTahunAjaranId,
+]);
 
         return back()->with('success', 'Kategori jadwal berhasil ditambahkan.');
     }
@@ -244,14 +263,16 @@ class JadwalController extends Controller
         DB::beginTransaction();
         try {
             // --- Teacher Hour Calculation ---
-            $calculateDuration = function($jam) {
+            $calculateDuration = function ($jam) {
                 try {
                     $parts = explode(' - ', $jam);
                     if (count($parts) !== 2) return 0;
                     $start = \Carbon\Carbon::parse($parts[0]);
                     $end = \Carbon\Carbon::parse($parts[1]);
                     return $end->diffInMinutes($start);
-                } catch (\Exception $e) { return 0; }
+                } catch (\Exception $e) {
+                    return 0;
+                }
             };
 
             $oldSchedules = Jadwal::where('kelas_id', $kelasId)
@@ -296,7 +317,7 @@ class JadwalController extends Controller
 
             $dataToInsert = [];
             $now = now();
-            
+
             foreach ($schedules as $scheduleData) {
                 if (!empty($scheduleData['guru_id']) || !empty($scheduleData['jadwal_kategori_id'])) {
                     $mapel = null;
@@ -336,7 +357,6 @@ class JadwalController extends Controller
 
             DB::commit();
             return response()->json(['success' => true, 'message' => 'Jadwal telah berhasil disimpan.']);
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Bulk store error: ' . $e->getMessage() . ' on line ' . $e->getLine() . ' in ' . $e->getFile());
@@ -353,12 +373,9 @@ class JadwalController extends Controller
         $activeTahunAjaranId = session('tahun_ajaran_id');
 
         foreach ($kategoriList as $kategori) {
-            $query = Kelas::where('nama_kelas', 'like', $kategori . '-%');
-
-            if ($activeTahunAjaranId) {
-                $query->where('tahun_ajaran_id', $activeTahunAjaranId);
-            }
-            $kelasCount = $query->count();
+            $kelasCount = Kelas::where('nama_kelas', 'like', $kategori . '-%')
+                ->where('tahun_ajaran_id', $activeTahunAjaranId)
+                ->count();
 
             $kategoriData[] = (object)[
                 'nama' => $kategori,
@@ -372,9 +389,9 @@ class JadwalController extends Controller
     {
         $activeTahunAjaranId = session('tahun_ajaran_id');
         $subkelas = Kelas::where('nama_kelas', 'like', $kategori . '-%')
-                         ->where('tahun_ajaran_id', $activeTahunAjaranId) // FIX: Filter by active year
-                         ->orderBy('nama_kelas')
-                         ->get();
+            ->where('tahun_ajaran_id', $activeTahunAjaranId) // FIX: Filter by active year
+            ->orderBy('nama_kelas')
+            ->get();
         return view('jadwal.pilih_subkelas', compact('kategori', 'subkelas'));
     }
 
@@ -441,20 +458,31 @@ class JadwalController extends Controller
 
             // --- Kalkulasi Ulang Jam Guru ---
             $duration = $this->calculateDuration($jadwal->jam);
-            
+
             // Kembalikan jam ke guru lama jika ada
             if ($oldGuruId) {
-                Guru::where('id', $oldGuruId)->increment('sisa_jam_mengajar', $duration);
+                $guruLama = Guru::where('id', $oldGuruId)->lockForUpdate()->first();
+                if ($guruLama) {
+                    $guruLama->sisa_jam_mengajar += $duration;
+                    $guruLama->save();
+                }
             }
 
             // Kurangi jam dari guru baru jika ada
             if ($newGuruId) {
-                $guruBaru = Guru::find($newGuruId);
+                $guruBaru = Guru::where('id', $newGuruId)->lockForUpdate()->first();
+                if (!$guruBaru) {
+                    DB::rollBack();
+                    return response()->json(['success' => false, 'message' => 'Guru tidak ditemukan.'], 404);
+                }
+
                 if ($guruBaru->sisa_jam_mengajar < $duration) {
                     DB::rollBack();
                     return response()->json(['success' => false, 'message' => 'Guru ' . $guruBaru->nama . ' akan melebihi total jam mengajar.'], 422);
                 }
-                $guruBaru->decrement('sisa_jam_mengajar', $duration);
+
+                $guruBaru->sisa_jam_mengajar -= $duration;
+                $guruBaru->save();
                 $newMapel = $guruBaru->pengampu;
             }
 
@@ -476,7 +504,6 @@ class JadwalController extends Controller
             $updatedJadwal = Jadwal::with('guru', 'kategori')->find($id);
 
             return response()->json(['success' => true, 'message' => 'Jadwal berhasil diperbarui.', 'data' => $updatedJadwal]);
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Inline update error: ' . $e->getMessage());
@@ -500,35 +527,58 @@ class JadwalController extends Controller
     }
 
     public function cetakJadwalBulk(Request $request)
-    {
-        $request->validate([
-            'kelas_ids' => 'required|string', // Comma-separated string of IDs
-        ]);
+{
+    $request->validate([
+        'kelas_ids' => 'required|string', // Comma-separated string of IDs
+    ]);
 
-        $kelasIds = explode(',', $request->kelas_ids);
-        $activeTahunAjaranId = session('tahun_ajaran_id');
-
-        $allKelasData = [];
-        foreach ($kelasIds as $kelas_id) {
-            $kelas = Kelas::findOrFail($kelas_id);
-            $jadwals = Jadwal::where('kelas_id', $kelas_id)
-                ->where('tahun_ajaran_id', $activeTahunAjaranId)
-                ->with('guru', 'kategori')
-                ->orderByRaw("FIELD(hari, 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu')")
-                ->orderBy('jam')
-                ->get()
-                ->groupBy('hari');
-            
-            $allKelasData[] = [
-                'kelas' => $kelas,
-                'jadwals' => $jadwals,
-            ];
-        }
-        $firstKelasNameParts = explode('-', $allKelasData[0]['kelas']->nama_kelas);
-        $angkatanName = $firstKelasNameParts[0] ?? 'Unknown';
-        $pdf = Pdf::loadView('jadwal.pdf_bulk', compact('allKelasData'));
-        return $pdf->download('jadwal-angkatan-' . $angkatanName . '.pdf');
+    $kelasIds = array_filter(explode(',', $request->kelas_ids)); // Filter empty values
+    
+    if (empty($kelasIds)) {
+        return back()->with('error', 'Tidak ada kelas yang dipilih untuk dicetak.');
     }
+
+    $activeTahunAjaranId = session('tahun_ajaran_id');
+    if (!$activeTahunAjaranId) {
+        return back()->with('error', 'Tahun ajaran tidak aktif. Silakan pilih tahun ajaran terlebih dahulu.');
+    }
+
+    $allKelasData = [];
+    foreach ($kelasIds as $kelas_id) {
+        $kelas = Kelas::find($kelas_id);
+        
+        // Skip jika kelas tidak ditemukan
+        if (!$kelas) {
+            Log::warning("Kelas dengan ID {$kelas_id} tidak ditemukan saat cetak bulk");
+            continue;
+        }
+        
+        $jadwals = Jadwal::where('kelas_id', $kelas_id)
+            ->where('tahun_ajaran_id', $activeTahunAjaranId)
+            ->with('guru', 'kategori')
+            ->orderByRaw("FIELD(hari, 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu')")
+            ->orderBy('jam')
+            ->get()
+            ->groupBy('hari');
+        
+        $allKelasData[] = [
+            'kelas' => $kelas,
+            'jadwals' => $jadwals,
+        ];
+    }
+    
+    // Double check after filtering
+    if (empty($allKelasData)) {
+        return back()->with('error', 'Tidak ada data kelas yang valid untuk dicetak.');
+    }
+    
+    // Safe get angkatan name
+    $firstKelasNameParts = explode('-', $allKelasData[0]['kelas']->nama_kelas);
+    $angkatanName = $firstKelasNameParts[0] ?? 'Multiple';
+    
+    $pdf = Pdf::loadView('jadwal.pdf_bulk', compact('allKelasData'));
+    return $pdf->download('jadwal-angkatan-' . $angkatanName . '.pdf');
+}
 
     public function destroy($id)
     {
@@ -537,23 +587,13 @@ class JadwalController extends Controller
         DB::beginTransaction();
         try {
             if ($jadwal->guru_id) {
-                $guru = Guru::find($jadwal->guru_id);
-                if ($guru) {
-                    $durasiMenit = 0;
-                    try {
-                        $jamParts = explode(' - ', $jadwal->jam);
-                        if (count($jamParts) == 2) {
-                            $jamMulai = \Carbon\Carbon::parse($jamParts[0]);
-                            $jamSelesai = \Carbon\Carbon::parse($jamParts[1]);
-                            $durasiMenit = $jamSelesai->diffInMinutes($jamMulai);
-                        }
-                    } catch (\Exception $e) {
-                        // Abaikan jika format jam salah, durasi akan tetap 0
-                    }
-                    $guru->sisa_jam_mengajar += $durasiMenit;
-                    $guru->save();
-                }
-            }
+    $guru = Guru::where('id', $jadwal->guru_id)->lockForUpdate()->first();
+    if ($guru) {
+        $durasiMenit = $this->calculateDuration($jadwal->jam);
+        $guru->sisa_jam_mengajar += $durasiMenit;
+        $guru->save();
+    }
+}
 
             $jadwal->delete();
             DB::commit();
@@ -600,7 +640,7 @@ class JadwalController extends Controller
             Jadwal::where('kelas_id', $kelas_id)
                 ->where('tahun_ajaran_id', $activeTahunAjaranId)
                 ->delete();
-            
+
             DB::commit();
             return redirect()->route('jadwal.perKelas', ['kelas' => $kelas_id])->with('success', 'Semua jadwal telah berhasil dihapus.');
         } catch (\Exception $e) {
@@ -610,11 +650,19 @@ class JadwalController extends Controller
         }
     }
 
-    private function calculateDuration($jamString){
-                   $parts = explode(' - ', $jamString);
+    private function calculateDuration($jamString)
+    {
+        try {
+            $parts = explode(' - ', $jamString);
             if (count($parts) !== 2) return 0;
+
             $start = \Carbon\Carbon::parse($parts[0]);
             $end = \Carbon\Carbon::parse($parts[1]);
-    } 
+
+            return $end->diffInMinutes($start);
+        } catch (\Exception $e) {
+            Log::warning("Invalid time format in calculateDuration: {$jamString}");
+            return 0;
+        }
+    }
 }
-        

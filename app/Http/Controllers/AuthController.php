@@ -9,9 +9,6 @@ class AuthController extends Controller
 {
     public function login(Request $request)
     {
-        // Regenerate session SEBELUM validasi
-        $request->session()->regenerate();
-
         $validated = $request->validate([
             'nis'      => 'required|string',
             'password' => 'required|string',
@@ -25,16 +22,19 @@ class AuthController extends Controller
 
         // === 1) ADMIN ===
         if (Auth::guard('web')->attempt(['nip' => $identifier, 'password' => $password])) {
+            $request->session()->regenerate(); // Regenerate setelah login sukses
             return redirect()->route('admin.dashboard')->with('login_success', 'Berhasil masuk sebagai Admin!');
         }
 
         // === 2) GURU ===
         if (Auth::guard('guru')->attempt(['nip' => $identifier, 'password' => $password])) {
+            $request->session()->regenerate();
             return redirect()->route('guru.dashboard')->with('login_success', 'Berhasil masuk sebagai Guru!');
         }
 
         // === 3) SISWA ===
         if (Auth::guard('siswa')->attempt(['nis' => $identifier, 'password' => $password])) {
+            $request->session()->regenerate();
             return redirect()->route('siswa.dashboard')->with('login_success', 'Berhasil masuk sebagai Siswa!');
         }
 
@@ -44,6 +44,7 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        // Logout dari semua guard
         foreach (['web', 'guru', 'siswa'] as $guard) {
             if (Auth::guard($guard)->check()) {
                 Auth::guard($guard)->logout();
@@ -53,6 +54,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/')->with('logout_success', 'Berhasil logout!');
+        return redirect()->route('landing')->with('logout_success', 'Berhasil logout!');
     }
 }

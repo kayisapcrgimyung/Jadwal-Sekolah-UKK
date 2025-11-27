@@ -438,12 +438,12 @@
 </div>
     <div class="marquee">
       
-      <span>Selamat Datang!! Silakan login untuk melanjutkan.</span>
+      <span>Selamat Datang Di Halaman Admin!! Silakan login untuk melanjutkan.</span>
     </div>
 
     <form method="POST" action="{{ route('login.post') }}">
       @csrf
-      <input type="text" name="nis" placeholder="Masukkan NIS/NIP" required>
+      <input type="text" name="nis" placeholder="Masukkan NIP" required>
       <input type="password" name="password" placeholder="Masukkan Password" required>
       <button type="submit">Masuk</button>
       <div class="help-text">
