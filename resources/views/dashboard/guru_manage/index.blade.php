@@ -45,7 +45,7 @@
                     <th style="white-space: nowrap;">JAM MENGAJAR</th>
                     <th style="white-space: nowrap;">SISA JAM</th>
                     <th>EMAIL</th>
-                    <th style="text-align: center; width: 150px;">AKSI</th>
+                    <th style="text-align: center; width: 180px;">AKSI</th>
                 </tr>
             </thead>
             <tbody>
@@ -53,21 +53,21 @@
                     @foreach($gurus as $guru)
                     <tr>
                         <td data-label="Foto" style="text-align: center;">
-        <div style="display: inline-flex; align-items: center; justify-content: center;">
-            @php
-                // Tentukan path gambar
-                if ($guru->profile_picture && $guru->profile_picture !== 'default-profile.jpg') {
-                    $imagePath = asset('storage/' . $guru->profile_picture);
-                } else {
-                    $imagePath = asset('img/Default-Profile.png');
-                }
-            @endphp
-            <img src="{{ $imagePath }}" 
-                 alt="Foto {{ $guru->nama }}" 
-                 style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary-color); box-shadow: 0 2px 8px rgba(17, 153, 142, 0.2);"
-                 onerror="this.src='{{ asset('img/Default-Profile.png') }}'">
-        </div>
-    </td>
+                            <div style="display: inline-flex; align-items: center; justify-content: center;">
+                                @php
+                                    // Tentukan path gambar
+                                    if ($guru->profile_picture && $guru->profile_picture !== 'default-profile.jpg') {
+                                        $imagePath = asset('storage/' . $guru->profile_picture);
+                                    } else {
+                                        $imagePath = asset('img/Default-Profile.png');
+                                    }
+                                @endphp
+                                <img src="{{ $imagePath }}" 
+                                     alt="Foto {{ $guru->nama }}" 
+                                     style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary-color); box-shadow: 0 2px 8px rgba(17, 153, 142, 0.2);"
+                                     onerror="this.src='{{ asset('img/Default-Profile.png') }}'">
+                            </div>
+                        </td>
                         <td data-label="Nama" style="font-weight: 500; color: var(--text-color);">{{ $guru->nama }}</td>
                         <td data-label="NIP" style="color: var(--text-light);">{{ $guru->nip }}</td>
                         <td data-label="Pengampu">
@@ -83,21 +83,24 @@
                         </td>
                         <td data-label="Email" style="color: var(--text-light);">{{ $guru->email }}</td>
                         <td data-label="Aksi" style="text-align: center;">
-                            <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
+                            <div style="display: flex; gap: 6px; justify-content: center; align-items: center; flex-wrap: nowrap;">
                                 <a href="{{ route('manage.guru.edit', $guru->id) }}" 
-                               class="btn btn-info btn-sm" 
-                               title="Edit"
-                               style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none;">
-                                <i class="fas fa-edit"></i>
-                                <span>Edit</span>
-                            </a>
-                                <a href="{{ route('manage.guru.availability.edit', $guru->id) }}" class="btn btn-info btn-sm" title="Atur Ketersediaan" style="padding: 8px 12px;">
-                                    <i class="fas fa-clock"></i> 
+                                   class="btn btn-info btn-sm action-btn" 
+                                   title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                    <span>Edit</span>
+                                </a>
+                                <a href="{{ route('manage.guru.availability.edit', $guru->id) }}" 
+                                   class="btn btn-warning btn-sm action-btn action-btn-icon" 
+                                   title="Atur Ketersediaan">
+                                    <i class="fas fa-clock"></i>
                                 </a>
                                 <form action="{{ route('manage.guru.destroy', $guru->id) }}" method="POST" class="delete-form" style="display: inline; margin: 0;">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm" title="Hapus" style="padding: 8px 12px;">
+                                    <button type="submit" 
+                                            class="btn btn-danger btn-sm action-btn action-btn-icon" 
+                                            title="Hapus">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
@@ -117,62 +120,62 @@
         </table>
     </div>
 
-   <div class="pagination-container" style="margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: center;">
-    @if ($gurus->hasPages())
-        <nav>
-            <ul class="pagination" style="display: flex; gap: 8px; list-style: none; padding: 0; margin: 0;">
-                
-                {{-- Tombol Previous --}}
-                @if ($gurus->onFirstPage())
-                    <li style="opacity: 0.5; pointer-events: none;">
-                        <span class="page-link" style="padding: 8px 14px; border-radius: 10px; background: var(--border-color); color: var(--text-light);">
-                            <i class="fas fa-chevron-left"></i>
-                        </span>
-                    </li>
-                @else
-                    <li>
-                        <a href="{{ $gurus->previousPageUrl() }}" class="page-link" style="padding: 8px 14px; border-radius: 10px; background: var(--primary-color); color: white; text-decoration: none;">
-                            <i class="fas fa-chevron-left"></i>
-                        </a>
-                    </li>
-                @endif
-
-                {{-- Nomor Halaman --}}
-                @foreach ($gurus->getUrlRange(1, $gurus->lastPage()) as $page => $url)
-                    @if ($page == $gurus->currentPage())
-                        <li>
-                            <span class="page-link active" style="padding: 8px 14px; border-radius: 10px; background: var(--primary-gradient); color: white; font-weight: bold;">
-                                {{ $page }}
+    <div class="pagination-container" style="margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: center;">
+        @if ($gurus->hasPages())
+            <nav>
+                <ul class="pagination" style="display: flex; gap: 8px; list-style: none; padding: 0; margin: 0;">
+                    
+                    {{-- Tombol Previous --}}
+                    @if ($gurus->onFirstPage())
+                        <li style="opacity: 0.5; pointer-events: none;">
+                            <span class="page-link" style="padding: 8px 14px; border-radius: 10px; background: var(--border-color); color: var(--text-light);">
+                                <i class="fas fa-chevron-left"></i>
                             </span>
                         </li>
                     @else
                         <li>
-                            <a href="{{ $url }}" class="page-link" style="padding: 8px 14px; border-radius: 10px; background: var(--border-color); color: var(--text-color); text-decoration: none;">
-                                {{ $page }}
+                            <a href="{{ $gurus->previousPageUrl() }}" class="page-link" style="padding: 8px 14px; border-radius: 10px; background: var(--primary-color); color: white; text-decoration: none;">
+                                <i class="fas fa-chevron-left"></i>
                             </a>
                         </li>
                     @endif
-                @endforeach
 
-                {{-- Tombol Next --}}
-                @if ($gurus->hasMorePages())
-                    <li>
-                        <a href="{{ $gurus->nextPageUrl() }}" class="page-link" style="padding: 8px 14px; border-radius: 10px; background: var(--primary-color); color: white; text-decoration: none;">
-                            <i class="fas fa-chevron-right"></i>
-                        </a>
-                    </li>
-                @else
-                    <li style="opacity: 0.5; pointer-events: none;">
-                        <span class="page-link" style="padding: 8px 14px; border-radius: 10px; background: var(--border-color); color: var(--text-light);">
-                            <i class="fas fa-chevron-right"></i>
-                        </span>
-                    </li>
-                @endif
+                    {{-- Nomor Halaman --}}
+                    @foreach ($gurus->getUrlRange(1, $gurus->lastPage()) as $page => $url)
+                        @if ($page == $gurus->currentPage())
+                            <li>
+                                <span class="page-link active" style="padding: 8px 14px; border-radius: 10px; background: var(--primary-gradient); color: white; font-weight: bold;">
+                                    {{ $page }}
+                                </span>
+                            </li>
+                        @else
+                            <li>
+                                <a href="{{ $url }}" class="page-link" style="padding: 8px 14px; border-radius: 10px; background: var(--border-color); color: var(--text-color); text-decoration: none;">
+                                    {{ $page }}
+                                </a>
+                            </li>
+                        @endif
+                    @endforeach
 
-            </ul>
-        </nav>
-    @endif
-</div>
+                    {{-- Tombol Next --}}
+                    @if ($gurus->hasMorePages())
+                        <li>
+                            <a href="{{ $gurus->nextPageUrl() }}" class="page-link" style="padding: 8px 14px; border-radius: 10px; background: var(--primary-color); color: white; text-decoration: none;">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    @else
+                        <li style="opacity: 0.5; pointer-events: none;">
+                            <span class="page-link" style="padding: 8px 14px; border-radius: 10px; background: var(--border-color); color: var(--text-light);">
+                                <i class="fas fa-chevron-right"></i>
+                            </span>
+                        </li>
+                    @endif
+
+                </ul>
+            </nav>
+        @endif
+    </div>
 
 </div>
 @endsection
@@ -206,13 +209,61 @@
     transform: translateX(2px);
 }
 
-.btn-sm {
-    font-size: 0.85rem;
+.action-btn {
     transition: all 0.2s ease;
+    font-weight: 500;
+    padding: 8px 14px !important;
+    font-size: 0.85rem !important;
+    border-radius: 8px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px;
+    white-space: nowrap;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    line-height: 1;
 }
 
-.btn-sm:hover {
+.action-btn-icon {
+    min-width: 38px !important;
+    width: 38px !important;
+    height: 38px !important;
+    padding: 0 !important;
+}
+
+.action-btn:hover {
     transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    opacity: 0.9;
+}
+
+.btn-info {
+    background: #17a2b8 !important;
+    color: white !important;
+}
+
+.btn-info:hover {
+    background: #138496 !important;
+}
+
+.btn-warning {
+    background: #ffc107 !important;
+    color: #000 !important;
+}
+
+.btn-warning:hover {
+    background: #e0a800 !important;
+}
+
+.btn-danger {
+    background: #dc3545 !important;
+    color: white !important;
+}
+
+.btn-danger:hover {
+    background: #c82333 !important;
 }
 
 @media (max-width: 768px) {
@@ -266,10 +317,22 @@
     .table td[data-label="Aksi"] > div {
         width: 100%;
         justify-content: flex-end !important;
+        flex-wrap: nowrap;
+        gap: 6px;
     }
 
-    .table td[data-label="Aksi"] .btn-sm {
-        padding: 8px 10px !important;
+    .table td[data-label="Aksi"] .action-btn {
+        padding: 8px 12px !important;
+        font-size: 0.8rem !important;
+        min-width: unset !important;
+        width: auto !important;
+        height: auto !important;
+    }
+    
+    .table td[data-label="Aksi"] .action-btn-icon {
+        width: 36px !important;
+        height: 36px !important;
+        padding: 0 !important;
     }
 }
 </style>

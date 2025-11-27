@@ -64,10 +64,58 @@
             color: var(--text-light);
             text-decoration: none;
             transition: var(--transition);
+            background: none;
+            border: none;
+            width: 100%;
+            cursor: pointer;
+            font-size: 0.95rem;
         }
         .user-dropdown-item:hover {
             background-color: var(--bg-primary);
             color: var(--primary-color);
+        }
+
+        /* Sidebar Logout Button Styling */
+        .sidebar .logout-btn {
+            width: calc(100% - 24px) !important;
+            padding: 16px 20px !important;
+            margin: 20px 12px 20px 12px !important;
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%) !important;
+            color: white !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            border-radius: 12px !important;
+            font-size: 1rem !important;
+            font-weight: 600 !important;
+            cursor: pointer !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 12px !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+            text-decoration: none !important;
+        }
+
+        .sidebar .logout-btn:hover {
+            background: linear-gradient(135deg, #5a6268 0%, #4e555b 100%) !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+            border-color: rgba(255, 255, 255, 0.3) !important;
+        }
+
+        .sidebar .logout-btn i {
+            font-size: 1.1rem !important;
+            transition: transform 0.3s ease !important;
+        }
+
+        .sidebar .logout-btn:hover i {
+            transform: translateX(-3px) !important;
+        }
+
+        /* Sidebar Form - Remove default padding/margin */
+        .sidebar > form {
+            padding: 0 !important;
+            margin: auto 0 0 0 !important;
         }
     </style>
 </head>
@@ -114,12 +162,12 @@
                         <strong>{{ Auth::guard('web')->user()->name }}</strong>
                         <small>{{ Auth::guard('web')->user()->email }}</small>
                     </div>
-                    <form action="{{ route('logout') }}" method="POST">
-    @csrf
-    <button type="submit" class="user-dropdown-item">
-        <i class="fas fa-sign-out-alt"></i> Logout
-    </button>
-</form>
+                    <form action="{{ route('logout') }}" method="POST" style="margin: 0; padding: 0;">
+                        @csrf
+                        <button type="submit" class="user-dropdown-item">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -129,8 +177,8 @@
         <!-- Sidebar -->
         <aside id="admin-sidebar" class="sidebar">
             <div class="sidebar-header">
-            <img src="{{ asset('img/Klipaa Original.png') }}" alt="Logo Klipaa">
-                  <div style="
+                <img src="{{ asset('img/Klipaa Original.png') }}" alt="Logo Klipaa">
+                <div style="
                     margin-top: 10px;
                     font-size: 16px;
                     font-weight: bold;
@@ -194,11 +242,11 @@
             </ul>
 
             <form action="{{ route('logout') }}" method="POST">
-    @csrf
-    <button type="submit" class="logout-btn" onclick="showLogoutConfirmation(event)">
-        <i class="fas fa-sign-out-alt"></i> Logout
-    </button>
-</form>
+                @csrf
+                <button type="submit" class="logout-btn" onclick="showLogoutConfirmation(event)">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </form>
 
         </aside>
 
@@ -373,23 +421,23 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         function showLogoutConfirmation(event) {
-    event.preventDefault();
-    let form = event.currentTarget.closest('form');
-    Swal.fire({
-        title: 'Yakin akan keluar?',
-        text: "Anda akan keluar dari sesi ini.",
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Ya, keluar!',
-        cancelButtonText: 'Batal'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            form.submit();
+            event.preventDefault();
+            let form = event.currentTarget.closest('form');
+            Swal.fire({
+                title: 'Yakin akan keluar?',
+                text: "Anda akan keluar dari sesi ini.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, keluar!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
         }
-    });
-}
 
         document.addEventListener('DOMContentLoaded', function() {
             @if(session('login_success'))
@@ -580,6 +628,23 @@
                 }
             });
 
+            // User dropdown menu toggle
+            const userMenuToggle = document.getElementById('user-menu-toggle');
+            const userDropdownMenu = document.getElementById('user-dropdown-menu');
+
+            if (userMenuToggle && userDropdownMenu) {
+                userMenuToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userDropdownMenu.classList.toggle('show');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!userMenuToggle.contains(e.target) && !userDropdownMenu.contains(e.target)) {
+                        userDropdownMenu.classList.remove('show');
+                    }
+                });
+            }
         });
     </script>
     @stack('scripts')
