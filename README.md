@@ -46,3 +46,5 @@ Untuk admin dapat Login di URL /admin/login. Sedangkan untuk user sendiri dapat 
 # Persyaratan Instalasi
 - Menggunakan php versi 8.2.12
 - Web Browser
+
+# Entity Relationship Diagram
