@@ -52,3 +52,35 @@ Untuk admin dapat Login di URL /admin/login. Sedangkan untuk user sendiri dapat 
 
 # Use Case Diagram 
 <img width="2090" height="188" alt="Image" src="https://github.com/user-attachments/assets/4d7cf8f0-ba4e-4fae-8e56-6aed1769265f" />
+
+# Instalasi
+
+### 1. Clone Repository
+git clone https://github.com/kayisapcrgimyung/Jadwal-Sekolah-UKK.git
+
+composer install
+
+cp .env.example .env
+
+### 2. Konfigurasi Database Pada File .env
+DB_CONNECTION=mysql
+
+DB_HOST=127.0.0.1
+
+DB_PORT=3306
+
+DB_DATABASE=ukk-jadwal
+
+DB_USERNAME=root
+
+DB_PASSWORD=
+
+### 3. Migrasi dan Menyambungkan Storage
+php artisan key:generate
+
+php artisan storage:link
+
+php artisan migrate --seed
+
+### 4. Mulai Website
+php artisan serve / php artisan ser
