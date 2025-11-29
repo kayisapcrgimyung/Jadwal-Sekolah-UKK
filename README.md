@@ -51,3 +51,4 @@ Untuk admin dapat Login di URL /admin/login. Sedangkan untuk user sendiri dapat 
 ![Image](https://github.com/user-attachments/assets/fe275963-d118-4016-a6a9-416efcdd9565)
 
 # Use Case Diagram 
+<img width="2090" height="188" alt="Image" src="https://github.com/user-attachments/assets/4d7cf8f0-ba4e-4fae-8e56-6aed1769265f" />
