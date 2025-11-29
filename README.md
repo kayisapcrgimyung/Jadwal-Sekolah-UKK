@@ -48,3 +48,6 @@ Untuk admin dapat Login di URL /admin/login. Sedangkan untuk user sendiri dapat 
 - Web Browser
 
 # Entity Relationship Diagram
+![Image](https://github.com/user-attachments/assets/fe275963-d118-4016-a6a9-416efcdd9565)
+
+# Use Case Diagram 
