@@ -35,7 +35,7 @@
     <button id="logoutBtn" class="w-full text-left px-5 py-3 hover:bg-red-600 transition-all duration-200">
       <i class="fa-solid fa-right-from-bracket mr-2"></i> Keluar
     </button>
-    <form id="logoutForm" action="{{ route('logout') }}" method="GET" class="hidden">@csrf</form>
+    <form id="logoutForm" action="{{ route('logout') }}" method="POST" class="hidden">@csrf</form>
   </div>
 </div>
 
