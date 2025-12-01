@@ -1,3 +1,4 @@
+# Dokumentasi Proyek Jadwal Sekolah
 # Konsep Web
 Website untuk membuat jadwal pelajaran
 
@@ -47,8 +48,11 @@ Untuk admin dapat Login di URL /admin/login. Sedangkan untuk user sendiri dapat 
 - Menggunakan php versi 8.2.12
 - Web Browser
 
-# Entity Relationship Diagram
+# Schema
 ![Image](https://github.com/user-attachments/assets/fe275963-d118-4016-a6a9-416efcdd9565)
+
+# Entity Relationship Diagram
+<img width="5664" height="2547" alt="Image" src="https://github.com/user-attachments/assets/1e1a483f-48e6-4eb3-aa0a-4d4c3aecda90" />
 
 # Use Case Diagram 
 <img width="2090" height="188" alt="Image" src="https://github.com/user-attachments/assets/4d7cf8f0-ba4e-4fae-8e56-6aed1769265f" />
