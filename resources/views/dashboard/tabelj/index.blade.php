@@ -54,7 +54,7 @@
             </button>
         </div>
     </div>
-    
+
     <div class="table-responsive" style="overflow-x: auto;">
         <table class="table" style="width: 100%; border-collapse: collapse; background: white; border-radius: 15px; overflow: hidden;">
             <thead style="background: var(--primary-gradient);">
@@ -98,9 +98,7 @@
                                 <a href="{{ route('manage.tabelj.edit', $tabelj->id) }}" class="btn btn-info btn-sm" title="Edit" style="display: inline-flex; align-items: center; gap: 5px; text-decoration: none; padding: 8px 16px;">
                                     <i class="fas fa-edit"></i> Edit
                                 </a>
-                                <button type="button" class="btn btn-warning btn-sm add-break-btn" data-id="{{ $tabelj->id }}" title="Tambah Istirahat" style="display: inline-flex; align-items: center; gap: 5px; padding: 8px 16px;">
-                                    <i class="fas fa-coffee"></i> Istirahat
-                                </button>
+                                
                                 <form action="{{ route('manage.tabelj.destroy', $tabelj->id) }}" method="POST" style="display:inline; margin: 0;" class="delete-form">
                                     @csrf
                                     @method('DELETE')
@@ -168,38 +166,38 @@
             flex-direction: column;
             align-items: stretch !important;
         }
-        
+
         .table-header > div {
             width: 100%;
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
-        
+
         .table-header .btn {
             width: 100%;
             justify-content: center;
         }
-        
+
         .table {
             font-size: 0.85rem;
         }
-        
+
         .table th,
         .table td {
             padding: 12px 10px;
         }
-        
+
         .action-buttons {
             flex-direction: column;
             width: 100%;
         }
-        
+
         .action-buttons .btn,
         .action-buttons form {
             width: 100%;
         }
-        
+
         .action-buttons .btn {
             justify-content: center;
         }
@@ -263,7 +261,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     const form = document.createElement('form');
                     form.method = 'POST';
                     form.action = '{{ route("manage.tabelj.destroyAll") }}';
-                    
+
                     const csrfInput = document.createElement('input');
                     csrfInput.type = 'hidden';
                     csrfInput.name = '_token';
@@ -288,7 +286,7 @@ document.addEventListener('DOMContentLoaded', function () {
     addBreakButtons.forEach(button => {
         button.addEventListener('click', function () {
             const tabeljId = this.dataset.id;
-            
+
             Swal.fire({
                 title: '☕ Tambah Jam Istirahat',
                 html: `

@@ -290,23 +290,23 @@
                 padding: 15px;
                 background: white;
             }
-            
+
             .header {
                 page-break-inside: avoid;
             }
-            
+
             .info-box {
                 page-break-inside: avoid;
             }
-            
+
             .day-section {
                 page-break-inside: avoid;
             }
-            
+
             table {
                 page-break-after: auto;
             }
-            
+
             thead {
                 display: table-header-group;
             }
@@ -368,13 +368,13 @@
                     <thead>
                         <tr>
                             <th>Hari</th>
+                            <th style="text-align: center;">Waktu</th>
                             <th>Mata Pelajaran</th>
                             @if(isset($guru))
                                 <th>Kelas</th>
                             @else
                                 <th>Guru Pengajar</th>
                             @endif
-                            <th style="text-align: center;">Waktu</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -383,7 +383,10 @@
                                 @if($index === 0)
                                     <td rowspan="{{ count($jadwalHarian) }}" class="day-column">{{ strtoupper($hari) }}</td>
                                 @endif
-                                
+
+                                <td class="time-cell">
+                                    {{ $jadwal->jam }}
+                                </td>
                                 @if($jadwal->kategori)
                                     <td colspan="2" class="kategori-cell">
                                         {{ $jadwal->kategori->nama_kategori }}
@@ -402,10 +405,7 @@
                                         </td>
                                     @endif
                                 @endif
-                                
-                                <td class="time-cell">
-                                    {{ $jadwal->jam }}
-                                </td>
+
                             </tr>
                         @endforeach
                     </tbody>

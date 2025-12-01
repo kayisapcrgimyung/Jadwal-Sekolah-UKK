@@ -25,7 +25,7 @@
 
     <form action="{{ route('manage.tabelj.store') }}" method="POST">
         @csrf
-        
+
         <div class="form-group">
             <label for="jam_mulai">
                 <i class="fas fa-clock" style="margin-right: 8px; color: var(--primary-color);"></i>
@@ -50,20 +50,7 @@
             <input type="number" name="durasi" id="durasi" required class="form-control" value="{{ old('durasi', '45') }}" min="1" placeholder="Contoh: 45">
         </div>
 
-        <div style="margin: 25px 0; padding: 20px; background: var(--bg-primary); border-radius: 15px; border: 2px dashed var(--border-color);">
-            <label style="font-weight: 600; color: var(--text-color); margin-bottom: 15px; display: block;">
-                <i class="fas fa-coffee" style="margin-right: 8px; color: var(--primary-color);"></i>
-                Waktu Istirahat
-            </label>
-            
-            <div id="istirahat-container">
-                <!-- Break time fields will be added here dynamically -->
-            </div>
-
-            <button type="button" id="add-istirahat" class="btn btn-info" style="margin-top: 15px; width: 100%;">
-                <i class="fas fa-plus"></i> Tambah Waktu Istirahat
-            </button>
-        </div>
+        
 
         <div class="form-group">
             <div class="form-check" style="padding: 18px; background: rgba(245, 87, 108, 0.05); border-radius: 12px; border: 2px solid rgba(245, 87, 108, 0.2);">
@@ -77,7 +64,7 @@
                 </label>
             </div>
         </div>
-        
+
         <div class="form-actions" style="margin-top: 30px; padding-top: 25px; border-top: 1px solid var(--border-color);">
             <button type="submit" class="btn btn-success">
                 <i class="fas fa-cogs"></i> Generate Slot Waktu
@@ -123,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function () {
             </button>
         `;
         container.appendChild(div);
-        
+
         // Add hover effect
         div.addEventListener('mouseenter', function() {
             this.style.borderColor = 'var(--primary-color)';
